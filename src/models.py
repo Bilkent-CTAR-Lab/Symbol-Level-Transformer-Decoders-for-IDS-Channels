@@ -5,13 +5,12 @@ from keras.layers import Dense, LayerNormalization
 from keras.layers import Dense, Embedding
 from keras import backend as K
 
-# ADD THESE:
 from keras.layers import MultiHeadAttention, Dropout
 
 class TransformerEncoderLayer(tf.keras.layers.Layer):
     def __init__(self, d_model, num_heads, dff, dropout_rate=0.1):
         super().__init__()
-        # standard choice: key_dim = d_model // num_heads
+        
         self.mha = MultiHeadAttention(num_heads=num_heads, key_dim=d_model // num_heads)
 
         self.ffn = keras.Sequential([
@@ -25,7 +24,7 @@ class TransformerEncoderLayer(tf.keras.layers.Layer):
         self.dropout2 = Dropout(dropout_rate)
 
     def call(self, x, training=False, mask=None):
-        # PRE-NORM variant
+        
 
         # 1) Self-attention block
         attn_input = self.layernorm1(x)
@@ -79,14 +78,13 @@ class Transformer_Insertion_Deletion(tf.keras.Model):
         self.pos_embedding = Embedding(input_dim=self.max_len, output_dim=self.d_model)
 
         # Transformer encoder layers
-        # Use an internal FFN dimension, typically 4 * d_model
         dff_internal = 4 * self.d_model
         self.encoder_layers = [
             TransformerEncoderLayer(self.d_model, self.num_heads, dff_internal, dropout_rate=self.dropout_rate)
             for _ in range(self.num_layers)
         ]
 
-        # MLP over time steps (same as in BiLSTM model)
+        # MLP over time steps
         self.mlp_layers = [Dense(k, activation="relu") for k in self.d_ffn]
 
         # Final output layer: logits over symbols or bits
